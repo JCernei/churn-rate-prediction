@@ -1,0 +1,132 @@
+Metadata sentiment dataset:
+
+
+Contains the sentiment for the articles from the communication between the customer and OTRS. The sentiment was determined based on the summary of the article. Both the summaries and sentiments were obtained using a LLM. 
+
+
+index - index of the article
+
+customer_id - customer to which the article belongs (article can be created by the customer, system or the agent) (anonymized)
+
+article_create_time - date and time when the article was created
+
+article_is_visible_for_customer - whether the article is visible for the customer
+
+sentiment_based_on_summary - sentiment score, number 1-10 where 1 is very negative, 10 very positive and 5 neutral
+
+
+
+
+
+
+Concurrent Agents dataset:
+
+
+Contains hourly data for the number of unique concurrent agents for each system ID
+
+
+TimeStamp - Time of the observation
+
+All other columns - The system id (anonymized) corresponding to the values in the column 
+
+The Prophet module has Automatic trend changepoint detection. One could look at the trajectory of the time series after the last change point and see if it is positive, negative or flat.
+
+Not all systems have data on the number of concurrent agents
+
+
+
+
+
+
+Metadata dataset:
+
+
+[1]{'Version'}[1]{'ContractItem'}[1]{'CancellationStatusCode'}[1]{'Content'} - Cancellation status code for Contract Item 1
+
+[1]{'Version'}[1]{'ContractItem'}[1]{'CustomerContractLifeCycleStatusCode'}[1]{'Content'} - Contract Lifecycle Status Code for Contract Item 1
+
+[1]{'Version'}[1]{'ContractItem'}[1]{'Description'}[1]{'Content'} - Description for Contract Item 1
+
+[1]{'Version'}[1]{'ContractItem'}[1]{'InternalID'}[1]{'Content'} - Internal ID for Contract Item 1
+
+[1]{'Version'}[1]{'ContractItem'}[1]{'ProductCategory'}[1]{'Content'} - Product Category for Contract Item 1
+
+[1]{'Version'}[1]{'ContractItem'}[1]{'ProductDescription'}[1]{'Content'} - Product Description for Contract Item 1
+
+[1]{'Version'}[1]{'ContractItem'}[1]{'SupportEndDate'}[1]{'Content'} - End Date for Contract Item 1
+
+[1]{'Version'}[1]{'ContractItem'}[1]{'SupportStartDate'}[1]{'Content'} - Start Date for Contract Item 1
+
+[1]{'Version'}[1]{'ContractItem'}[1]{'ValidityStatusCode'}[1]{'Content'} - Validity Status Code for Contract Item 1
+
+[1]{'Version'}[1]{'ContractItem'}[1]{'ConcurrentSessions'}[1]{'Content'} - We believe this is the maximum number of concurrent agents for Contract Item 1
+
+[1]{'Version'}[1]{'Description'}[1]{'Content'} - Description of the contract (Entire contract, not just one of the contract items)
+
+[1]{'Version'}[1]{'EndDateTime'}[1]{'Content'} - End Date of the contract (Entire contract)
+
+[1]{'Version'}[1]{'StartDateTime'}[1]{'Content'} - Start Date of the contract (Entire contract)
+
+[1]{'Version'}[1]{'ItemCount'}[1]{'Content'} - Number of Contract Items in the contract
+
+[1]{'Version'}[1]{'ItemListCancellationStatusCode'}[1]{'Content'} - Cancellation Status Code of the contract (Entire contract)
+
+[1]{'Version'}[1]{'ItemListCustomerContractLifeCycleStatusCode'}[1]{'Content'} - Contract Lifecycle Status Code of the contract (Entire contract)
+
+[1]{'Version'}[1]{'ItemListValidityStatusCode'}[1]{'Content'} - Validity Status Code of the contract (Entire contract)
+
+contract_label - whether the contract is active or cancelled
+
+customer_earliest_start - Earliest start date of any contract for the respective end_customer_id except for contracts with state 'draft'
+
+customer_latest_end - Latest end date of any contract for the respective end_customer_id except for contracts with state 'draft'
+
+Based on customer_earliest_start and customer_latest_end we can calculate the customer age. We discussed using 'today' minus earliest start for active customers and latest_end minus earliest_start for cancelled customers. There will probably be one formula for all customers and the customer_label column will be ignored.
+
+customer_label - Whether the customer is 'active' or 'cancelled'. An active customer is considered one with at least one active contract.
+Because the list of active/cancelled customers was created some time before this dataset, there exist a few instances where 'cancelled' customers
+have an active contract and where 'active' customers only have cancelled contracts
+
+SLA - Service level of the contract determined based on the Product Description
+
+ProductCategory - Whether the customer is SaaS/On-Premise determined based on the Product Description
+
+service_level_regex - Service level of the contract determined based on the Contract Description
+
+otrs_version - OTRS version based on system ID
+
+One possibility would be to create 3 categories: version 8, version 7 and older.
+As far as I know, only versions 7 and 8 are supported.
+For systems with very old version of OTRS, it could be because the system has not sent any data about its version in a long time.
+
+system_type - whether the system is managed or on-premise (auto)
+
+Value 'manual' for this variable is obsolete after OTRS 5
+
+
+feature_add_ons - All feature add-ons installed on the system
+
+Feature add-ons is the old name, now they are called features.
+The list includes all feature add-ons installed on the system. If you are interested in only those that are offered to customers as a paid service, you can filter them using the list on the website https://otrs.com/otrs-software-solutions/otrs/features/
+
+Not all feature add-ons are installed upon customer request, some are installed by default. For example, if I remember correctly all feature add-ons that start with 'SaaS' are installed by default on managed systems. 
+
+Some systems don't have any feature add-ons installed and have the value 'No feature add-ons'
+
+cancellation_date - Date and time when a ticket signalling the cancellation of a contract by the customer was created. To prevent data leakage we should not use data for this customer/system beyond this point in time (for ex. Data about the concurrent agents). Only applies to cancelled contracts. 
+
+customer_country - Country of the customer
+
+concat_volume - yearly amount paid by the customer for this contract. Data was collected from two sources so pay attention that numbers exist with two formats.
+
+concat_currency - currency corresponding to the concat_volume. Data was collected from two sources so pay attention that currencies exist with two formats. 
+
+concat_subsidiary - Subsidiary through which the contract was sold. Data was collected from two sources so pay attention that subsidiaries exist with two formats.
+
+cancellation_date_orca - Since cancellation_date based on a cancellation ticket does not exist for all customers, this can be used as an alternative. We determine which tickets are about cancellation using an LLM and store the earliest create date of such a ticket from 2023 in this column
+
+xml_key - ID of the contract (anonymized)
+
+[1]{'Version'}[1]{'EndCustomerID'}[1]{'Content'} - End customer of the contract (anonymized)
+
+[1]{'Version'}[1]{'OTRSSystemID'}[1]{'Content'} - System ID corresponding to the contract (anonymized)
